@@ -1,0 +1,94 @@
+USE master
+DROP DATABASE Exercicio3 
+
+USE master
+CREATE DATABASE Exercicio3
+USE Exercicio3 
+
+create table Pacientes (
+CPF char(11)        not  null,
+Nome varchar(80)     not null,
+Rua varchar(80)     not null, 
+Numero int          not null,
+Bairro varchar(80)   not null,
+Telefone char(11  ) null,
+Data_Nasc date	    not null,
+primary key (CPF)
+)
+go
+
+CREATE TABLE Medico(		
+Codigo INT	NOT NULL,	
+Nome VARCHAR(50) NOT NULL,
+Especialidade VARCHAR(50) NOT NULL
+PRIMARY KEY (Codigo)
+)
+GO
+
+CREATE TABLE Prontuario (			
+Data_Consulta			DATE		NOT NULL,	
+CPF_Paciente			CHAR(11)	NOT NULL,				
+Codigo_medico			INT			NOT NULL,
+Diagnostico				VARCHAR(30)	NOT NULL,
+Medicamento				VARCHAR(30) NOT NULL
+PRIMARY KEY (Data_Consulta, CPF_Paciente,Codigo_medico)
+FOREIGN KEY (CPF_Paciente)  REFERENCES Pacientes (CPF),
+FOREIGN KEY (Codigo_medico) REFERENCES Medico (Codigo)
+)
+GO
+
+INSERT INTO Pacientes VALUES
+(35454562890,'José Rubens','Campos Salles',	2750,'Centro','21450998','1954-10-18'),
+(29865439810,'Ana Claudia','Sete de Setembro',178,'Centro','97382764','1960-05-29'),
+(82176534800,'Marcos Aurélio','Timóteo Penteado',236,'Vila Galvão',	'68172651',	'1980-09-24'),
+(12386758770,'Maria Rita','Castello Branco',7765,'Vila Rosália',NULL,'1975-03-30'),
+(92173458910,'Joana de Souza','XV de Novembro',	298,'Centro',	'21276578',	'1944-04-24')
+
+INSERT INTO Medico VALUES
+(1,'Wilson Cesar','Pediatra'),
+(2,'Marcia Matos','Geriatra'),
+(3,'Carolina Oliveira','Ortopedista'),
+(4,'Vinicius Araujo','Clínico Geral')
+
+INSERT INTO Prontuario VALUES 
+('2020-09-10','35454562890',2,'Reumatismo','Celebra'),
+('2020-09-10','92173458910',2,'Renite Alérgica','Allegra'),
+('2020-09-12','29865439810',1,'Inflamação de garganta','Nimesulida'),
+('2020-09-13','35454562890',2,'H1N1','Tamiflu'),
+('2020-09-15','82176534800',4,'Gripe','Resprin'),
+('2020-09-15','12386758770',3,'Braço Quebrado','Dorflex + Gesso')
+
+SELECT * FROM Pacientes 
+SELECT * FROM Medico
+SELECT * FROM Prontuario
+
+
+SELECT Nome, Rua + CAST(Numero AS VARCHAR) + Bairro FROM Pacientes WHERE  DATEDIFF(YEAR, Data_Nasc, GETDATE())>50;
+
+SELECT Nome, Especialidade FROM Medico WHERE Nome LIKE 'Carolina Oliveira'
+
+SELECT Diagnostico AS "Diagnostico", Medicamento FROM Prontuario WHERE Diagnostico LIKE 'reumatismo';
+
+Select Diagnostico, Medicamento from Prontuario where CPF_Paciente in( select CPF from Pacientes where Nome Like 'José Rubens');
+
+select Nome, case when LEn(Especialidade)>3 then substring (Especialidade,1,3) + '.' else Especialidade end as Especialidade
+
+from Medico 
+where Codigo in ( Select Codigo_Medico from Prontuario where CPF_Paciente in ( select CPF from Pacientes where Nome Like 'José Rubens'));
+
+select substring(CPF,1,3) + '.' +  substring(CPF,4,3) +  '.' + substring(CPF,7,3) + '-' + Substring(CPF,10,2),
+Rua + ' '+ cast(Numero as varchar) + ' '+ Bairro As "Endereço Completo", 
+Case
+when Len(Telefone) IS null then '(-)' else Telefone end as Telefone from Pacientes where CPF in (select CPF_Paciente from Prontuario where Codigo_medico in( select Codigo from Medico where Nome like '%Vinicius%'));
+
+select Data_Consulta, 
+datediff(day, Data_Consulta, getdate()) as "quant" from Prontuario 
+where CPF_Paciente in ( select CPF from Pacientes where Nome like 'Maria Rita');
+
+update pacientes set Telefone = '98345621' where Nome like 'Maria Rita'
+update Pacientes set 
+Rua = 'Voluntarios da Pátria',
+Numero = 1980,
+Bairro = 'Jd.Aeroporto'
+where Nome like 'Joana de Souza';
+
