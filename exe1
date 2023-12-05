@@ -1,0 +1,89 @@
+use master 
+drop database exe1
+create database exe1
+
+use exe1
+go
+create table Aluno (
+Ra int not null,
+Nome varchar(80) not null,
+Sobrenome varchar(80) not null,
+Rua varchar (80) not null,
+Numero char(6) not null, 
+Bairro varchar (80) not null,
+Cep char (8) not null,
+Telefone char(12) not null
+primary key(Ra) 
+
+)
+go
+
+CREATE TABLE Cursos (
+Codigo		   INT         NOT NULL,
+Nome		   VARCHAR(30) NOT NULL,
+Carga_Horaria  INT         NOT NULL,
+Turno		   VARCHAR(7)  NOT NULL
+PRIMARY KEY (Codigo)
+)
+GO
+
+CREATE TABLE Disciplinas (
+Codigo			INT			NOT NULL,
+Nome			VARCHAR(20) NOT NULL,
+Carga_Horaria	INT			NOT NULL,
+Turno			VARCHAR(20) NOT NULL,
+Semestre		INT			NOT NULL
+PRIMARY KEY (Codigo)
+)
+GO
+
+
+INSERT INTO Aluno VALUES 
+(12345,'José','Silva','Almiranre Noronha','236','Jardim São Paulo','1589000','698775287' ),
+(12346,'Ana','Silva','Anhaia','1568','Barra Funda','3569000','25698526'),
+(12347,'Mario','Santos','XV de Novembro','1841','Centro','1020030',NULL),
+(12348,'Marcia','Neves','Voluntários da Patria','255','Santana','2785090', '78964152')
+
+INSERT INTO Cursos VALUES
+(1,	'Informática',	2800,	'Tarde'),
+(2,	'Informática',	2800,	'Noite'),
+(3,	'Logística',	2650,	'Tarde'),
+(4,	'Logística',	2650,	'Noite'),
+(5,	'Plásticos',	2500,	'Tarde'),
+(6,	'Plásticos',	2500,	'Noite')
+
+INSERT INTO Disciplinas VALUES
+(1,	'Informática',		  4,'Tarde',1),
+(2,	'Informática',		  4,'Noite',1),
+(3,	'Quimica',			  4,'Tarde',1),
+(4,	'Quimica',            4,'Noite',1),
+(5,	'Banco de Dados I',	  2,'Tarde',3),
+(6,	'Banco de Dados I',	  2,'Noite',3),
+(7,	'Estrutura de Dados', 4,'Tarde',4),
+(8,	'Estrutura de Dados', 4,'Noite',4)
+
+
+--consulta 
+ 
+SELECT Nome, Sobrenome
+FROM Aluno;
+
+
+ 
+SELECT Rua, Numero, Bairro, Cep
+FROM Aluno
+WHERE Telefone IS NULL;
+
+
+SELECT Telefone
+FROM Aluno
+WHERE RA = 12348;
+
+Select Nome, Turno
+From Cursos 
+where Carga_Horaria = 2800;
+
+select Semestre
+from Disciplinas
+where Nome = 'Banco de Dados I' and Turno = 'Noite';
+
