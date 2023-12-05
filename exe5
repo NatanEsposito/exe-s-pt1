@@ -1,0 +1,155 @@
+use master 
+Drop database Exercicio5
+
+create database Exercicio5
+use master 
+
+use Exercicio5
+
+
+CREATE TABLE Cliente(					
+Codigo				INT				NOT NULL,	
+Nome				VARCHAR(50)		NOT NULL,
+Logradouro			VARCHAR(30)		NOT NULL,
+Numero				INT				NOT NULL,
+Telefone			CHAR(08)		NOT NULL,
+Data_Nasc			DATE			NOT NULL
+PRIMARY KEY	(Codigo)
+)
+GO
+
+INSERT INTO Cliente VALUES
+(33601,	'Maria Clara',	'R. 1° de Abril',			870,	'96325874',	'2000-08-15'),
+(33602,	'Alberto Souza',	'R. XV de Novembro',	987,	'95873625',	'1985-02-02'),
+(33603,	'Sonia Silva',	'R. Voluntários da Pátria',	1151,	'75418596',	'1957-08-23'),
+(33604,	'José Sobrinho',	'Av. Paulista',			250,	'85236547',	'1986-12-09'),
+(33605,	'Carlos Camargo',	'Av. Tiquatira',		9652,	'75896325',	'1971-03-25')
+
+SELECT * FROM Cliente
+
+CREATE TABLE Fornecedores(
+Codigo			INT			NOT NULL,
+Nome			VARCHAR(50) NOT NULL,
+Atividade		VARCHAR(30) NOT NULL,
+Telefone		CHAR(08)	NOT NULL,
+PRIMARY KEY (Codigo)
+)
+GO
+
+INSERT INTO Fornecedores VALUES
+(1001,	'Estrela',		'Brinquedo',				'41525898'),
+(1002,	'Lacta',		'Chocolate',				'42698596'),
+(1003,	'Asus',			'Informática',				'52014596'),
+(1004,	'Tramontina',	'Utensílios Domésticos',	'50563985'),
+(1005,	'Grow',			'Brinquedos',				'47896325'),
+(1006,	'Mattel',		'Bonecos',					'59865898')
+
+CREATE TABLE Produto(
+Codigo				INT				NOT NULL,	
+Nome				VARCHAR(50)		NOT NULL,
+Valor_Unitário		DECIMAL(7,2)	NOT NULL,
+Quantidade_Estoque	INT				NOT NULL,
+Descrição			VARCHAR(30)		NOT NULL,
+Codigo_Fornecedor	INT				NOT NULL
+PRIMARY KEY (Codigo)
+FOREIGN kEY (Codigo_Fornecedor) REFERENCES Fornecedores(Codigo)
+)
+GO
+
+INSERT INTO Produto VALUES
+(1,	'Banco Imobiliário',		65.00,	15,	'Versão Super Luxo',	1001),
+(2,	'Puzzle 5000 peças',		50.00,	5,	'Mapas Mundo',	1005),
+(3,	'Faqueiro',					350.00,	0,	'120 peças',	1004),
+(4,	'Jogo para churrasco',		75.00,	3,	'7 peças',	1004),
+(5,	'Tablet',					750.00,	29,	'Tablet',	1003),
+(6,	'Detetive',					49.00,	0,	'Nova Versão do Jogo',	1001),
+(7,	'Chocolate com Paçoquinha',	6.00,	0,	'Barra',	1002),
+(8,	'Galak',					5.00,	65,	'Barra',	1002)
+
+SELECT * FROM Produto
+
+CREATE TABLE Pedido (				
+Codigo				INT		NOT NULL,
+Codigo_Cliente		INT		NOT NULL,
+Codigo_Produto		INT		NOT NULL,
+Quantidade			INT		NOT NULL,
+Previsão_Entrega	DATE	NOT NULL
+PRIMARY KEY (Codigo,Codigo_Cliente,Codigo_Produto)
+FOREIGN KEY (Codigo_Cliente) REFERENCES Cliente(Codigo),
+FOREIGN KEY (Codigo_Produto) REFERENCES Produto(Codigo)	
+)
+GO
+
+INSERT INTO Pedido VALUES
+(99001,	33601,	1,	1,	'2012-06-07'),
+(99001,	33601,	2,	1,	'2012-06-07'),
+(99001,	33601,	8,	3,	'2012-06-07'),
+(99002,	33602,	2,	1,	'2012-06-09'),
+(99002,	33602,	4,	3,	'2012-06-09'),
+(99003,	33605,	5,	1,	'2012-06-15')
+
+SELECT * FROM Pedido
+
+SELECT
+    prod.Codigo AS CodigoProduto,
+    prod.Nome AS NomeProduto,
+    ped.Quantidade,
+    ped.Quantidade * prod.Valor_Unitário AS ValorTotal,
+    ped.Quantidade * prod.Valor_Unitário * 0.75 AS ValorTotalComDesconto
+FROM 
+    Produto prod,
+    Pedido ped,
+    Cliente cli
+WHERE 
+    ped.Codigo_Produto = prod.Codigo
+    AND ped.Codigo_Cliente = cli.Codigo
+    AND cli.Nome = 'Maria Clara';
+
+
+select Nome, Quantidade_Estoque from Produto where Quantidade_Estoque = 0
+
+update Produto set Valor_Unitário =Valor_Unitário * 0.9 where Descrição like 'Barra'
+select *from Produto
+
+--Alterar a quantidade em estoque do faqueiro para 10 peças.	
+
+update Produto set Quantidade_Estoque = 10 where Nome = 'Faqueiro'
+
+
+--Consultar quantos clientes tem mais de 40 anos.		
+select Nome from Cliente where datediff(year, Data_Nasc, getdate())>40
+
+--Consultar Nome e telefone dos fornecedores de Brinquedos e Chocolate.	
+
+select Nome, Telefone from Fornecedores where Atividade = 'Brinquedo' or Atividade = 'Chocolate'
+
+--Consultar nome e desconto de 25% no preço dos produtos que custam menos de R$50,00
+select Nome, Valor_Unitário, 'R$' + cast(cast(Valor_Unitário * 0.75 as decimal(7,2)) as varchar(8)) as "Novo Valor"
+from Produto where Valor_Unitário<50.00
+
+select Nome, Valor_Unitário, 'R$' + cast(cast(Valor_Unitário * 1.1 as decimal(7,2)) as varchar(8)) as "Novo valor com aumento"
+from Produto
+where Valor_Unitário>100.00
+
+Select 
+p.Codigo as CodigoProduto,
+p.Nome as NomeProduto,
+p.Valor_Unitário as ValorUnitário,
+(Select Quantidade from Pedido where Codigo_Produto = p.Codigo and Codigo = 99001) as Quantidade,
+(Select Quantidade * Valor_Unitário *0.85 from Pedido where Codigo_Produto = p.Codigo and Codigo = 99001) AS ValorTotalComDesconto
+from Produto p
+where p.Codigo in(
+Select Codigo_Produto
+from Pedido where Codigo = 99001);
+
+SELECT
+    ped.Codigo AS CodigoPedido,
+    cli.Nome AS NomeCliente,
+    DATEDIFF(YEAR, cli.Data_Nasc, GETDATE()) AS IdadeAtual
+FROM 
+    Pedido ped,
+    Cliente cli
+WHERE 
+    ped.Codigo_Cliente = cli.Codigo;
+
+
