@@ -1,0 +1,105 @@
+USE master
+CREATE DATABASE Exercicio6
+USE Exercicio6
+
+USE master
+DROP DATABASE Exercicio6
+
+CREATE TABLE Motorista(			
+Codigo				INT				NOT NULL,	
+Nome				VARCHAR(50)		NOT NULL,
+Data_nascimento		DATE			NOT NULL,
+Naturalidade		VARCHAR(30)		NOT NULL
+PRIMARY KEY (Codigo)
+)
+GO
+
+INSERT INTO Motorista VALUES
+(12341,	'Julio Cesar',		'1978-04-18',	'São Paulo'),
+(12342,	'Mario Carmo',		'2002-07-29',	'Americana'),
+(12343,	'Lucio Castro',		'1969-12-01',	'Campinas'),
+(12344,	'André Figueiredo',	'1999-05-14',	'São Paulo'),
+(12345,	'Luiz Carlos',		'2001-01-09',	'São Paulo')
+
+
+CREATE TABLE Onibus(			
+Placa			CHAR(07)			NOT NULL,
+Marca			VARCHAR(15)			NOT NULL,
+Ano				INT					NOT NULL,
+Descricao		VARCHAR(30)			NOT NULL
+PRIMARY KEY (Placa)
+)
+GO
+
+INSERT INTO	Onibus VALUES
+('adf0965',   	'Mercedes',            	1999,	'Leito'),               
+('bhg7654',  	'Mercedes',           	2002,	'Sem Banheiro'),        
+('dtr2093',   	'Mercedes',            	2001,	'Ar Condicionado'),     
+('gui7625',  	'Volvo',              	2001,	'Ar Condicionado')    
+
+CREATE TABLE Viagem(					
+Codigo				INT			NOT NULL,
+Onibus				CHAR(7)			NOT NULL,
+Motorista			INT			NOT NULL,
+Hora_Saida			TIME		NOT NULL,
+Hora_Chegada		TIME		NOT NULL,		
+Destino				VARCHAR(20)	NOT NULL
+PRIMARY KEY (Codigo, Onibus, Motorista)
+FOREIGN KEY (Onibus) REFERENCES Onibus(Placa),
+FOREIGN KEY (Motorista) REFERENCES Motorista(Codigo)
+)
+GO
+
+INSERT INTO Viagem VALUES
+(101,	'adf0965',   	12343,	'10:00:00',	'12:00:00',	'Campinas'),
+(102,	'gui7625',   	12341,	'07:00:00',	'12:00:00',	'Araraquara'),
+(103,	'bhg7654',   	12345,	'14:00:00',	'22:00:00',	'Rio de Janeiro'),
+(104,	'dtr2093',   	12344,	'18:00:00',	'21:00:00',	'Sorocaba')
+
+SELECT * FROM Viagem
+
+select 
+convert(char(5), Hora_saida, 108) as "Hora de Saída",
+convert(char(5), Hora_Chegada,108)as "Hora Chegada",--108 HH:mm
+ Destino
+ from viagem
+
+ select Nome
+ from Motorista
+ where Codigo in(
+ select Motorista 
+ from Viagem
+ where Destino = 'Sorocaba');
+
+ -- Consultar, com subquery, a descrição do ônibus que vai para o Rio de Janeiro	
+ select 
+ Descricao as Descrição 
+ from Onibus 
+ where Placa in(
+ select Onibus 
+ from Viagem 
+ where Destino = 'Rio de Janeiro');
+
+--Consultar, com Subquery, a descrição, a marca e o ano do ônibus dirigido por Luiz Carlos
+
+select 
+Descricao as Descrição, 
+ Marca, Ano
+from Onibus 
+
+where Placa in (
+select Onibus 
+from Viagem 
+where Motorista in(
+select Codigo 
+from Motorista 
+where Nome Like ' Luiz Carlos'));
+
+-- Consultar o nome, a idade e a naturalidade dos motoristas com mais de 30 anos	
+
+select Nome,
+datediff (year, Data_Nascimento,getdate()) as Idade, 
+Naturalidade
+from Motorista
+where DAteDIFF(Year, Data_Nascimento,getdate())>30;
+
